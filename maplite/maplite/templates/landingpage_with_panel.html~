@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+        <title>Masakan Padang, Nikmaat!</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+        <link rel="shortcut icon" href="{{ STATIC_URL }}endikimg/dckLogo.jpg"> 
+
+        <link href="{{ STATIC_URL }}bootstrap/dist/css/bootstrap.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/leaflet.css" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/MarkerCluster.css" />
+        <link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/MarkerCluster.Default.css" />  
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/L.Control.Sidebar.css" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/leaflet.label.css" />
+
+	<style>
+		body {
+			padding: 0;
+			margin: 0;
+		}
+		html, body, #map {
+			height: 100%;
+		}
+
+        	.lorem {
+        	    font-style: italic;
+        	    color: #AAA;
+        	}
+
+		.sidebar-control
+		{
+		    background-image: url("{{ STATIC_URL }}leaflet-0.7/images/sidebar.png");
+		    width: 20px;
+		    height: 20px;
+		    background-position: 50% 50%;
+		    background-repeat: no-repeat;
+		    display: block;
+		    padding: 3px;
+		    border-radius: 4px;
+		    -webkit-border-radius: 4px;
+		    -moz-border-radius: 4px;
+		    box-shadow: 0 1px 7px rgba(0, 0, 0, 0.65);
+		    cursor: auto;
+		    text-align: center;
+		    background-color: #FFFFFF;
+		}
+
+		.sidebar-control:hover
+		{
+		    background-color: #F4F4F4;
+		}
+
+
+		.info {
+			padding: 6px 8px;
+			font: 14px/16px Arial, Helvetica, sans-serif;
+			background: white;
+			background: rgba(255,255,255,0.8);
+			box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			border-radius: 5px;
+		}
+		.info h4 {
+			margin: 0 0 5px;
+			color: #777;
+		}
+
+		.legend {
+			text-align: left;
+			line-height: 18px;
+			color: #555;
+		}
+		.legend i {
+			width: 18px;
+			height: 18px;
+			float: left;
+			margin-right: 8px;
+			opacity: 0.7;
+		}
+
+
+
+	</style>
+
+</head>
+<body>
+<div id="sidebar">
+    <h1><span class="text-muted">Masakan Padang</span></h1>
+        <p>A responsive sidebar plugin for for <a href="{% url 'home' %}" target="_blank">Masakan Padang</a>, a JS library for interactive maps.</p>
+
+        <p><b>Click on the marker to show the sidebar again when you've closed it.</b></p>
+
+        <p>Saya Ingin:</p>
+
+        <ul>
+            <li><a href="{% url 'rm_listing' %}" target="_blank">Melihat daftar Masakan Padang Favorit</a></li>
+            <li><a href="{% url 'makemarker' %}" target="_blank">Memasukkan Masakan Padang favorit saya</a></li>
+
+        </ul>
+
+        <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+
+        <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+
+        <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+
+        <p class="lorem">Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit amet.</p>
+
+</div>
+	
+	<div id="map"></div>
+
+        <script src="{{ STATIC_URL }}bootstrap/dist/js/jquery.js"></script>
+        <script src="{{ STATIC_URL }}bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/jquery.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/leaflet.js"></script>
+        <script src="{{ STATIC_URL }}leaflet-0.7/leaflet.markercluster-src.js"></script>   
+	<script src="{{ STATIC_URL }}leaflet-0.7/L.Control.Sidebar.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/leaflet.label-src.js"></script>
+
+	<script>
+
+//center and zoom is fixed, as of Sep 8!
+var map = L.map('map', {
+	center: [-3.04578, 118.16895],
+	zoom: 5,
+        minZoom: 4,
+        //maxZoom: 18,
+});
+
+//-- setup zoom tool ---------------------------------------------
+//L.control.scale().addTo(map);
+L.control.scale({imperial: false}).addTo(map);
+
+
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 18,
+	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+}).addTo(map);
+
+function togglepanel() {
+       	sidebar.toggle();
+		if (sidebar.isVisible()) {
+		  //alert('True');
+		} else {
+		  //alert('False');	
+		}
+
+}
+
+var MyControl = L.Control.extend({
+    options: {
+        position: 'topleft'
+    },
+
+    onAdd: function (map) {
+        // create the control container with a particular class name
+        var container = L.DomUtil.create('div', 'sidebar-control');
+
+        // ... initialize other DOM elements, add listeners, etc.
+    L.DomEvent
+        .addListener(container, 'click', L.DomEvent.stopPropagation)
+        .addListener(container, 'click', L.DomEvent.preventDefault)
+        .addListener(container, 'click', togglepanel);
+
+
+        container.title = 'Toggle Sidebar';
+        return container;
+    }
+});
+
+map.addControl(new MyControl());
+
+
+        var sidebar = L.control.sidebar('sidebar', {
+            closeButton: true,
+            position: 'left'
+        });
+        map.addControl(sidebar);
+
+        setTimeout(function () {
+            sidebar.show();
+        }, 500);
+
+var popup = L.popup();
+
+//function onMapClick(e) {
+//	popup
+//		.setLatLng(e.latlng)
+//		.setContent("You clicked the map at " + e.latlng.toString())
+//		.openOn(map);
+//}
+
+//map.on('click', onMapClick);
+
+//* control that shows state info on hover
+var info = L.control();
+
+
+info.onAdd = function (map) {
+	this._div = L.DomUtil.create('div', 'info');
+	this.update();
+	return this._div;
+};
+
+info.update = function (props) {
+	this._div.innerHTML = '<h4>Jumlah POIs tiap propinsi</h4>' +  (props ?
+		'<b>' + props.PROPINSI + '</b><br />' + props.COUNT + ' POIs '
+		: 'Hover over Propinsi');
+};
+
+info.addTo(map);
+
+// get color depending on population density value
+function getColor(d) {
+	return d > 5000 ? '#800026' :
+	       d > 4000  ? '#BD0026' :
+	       d > 3000  ? '#E31A1C' :
+	       d > 2000  ? '#FC4E2A' :
+	       d > 1000  ? '#FD8D3C' :
+	       d > 500   ? '#FEB24C' :
+	       d > 100   ? '#FED976' :
+	                  '#FFEDA0';
+}
+
+function style(feature) {
+	return {
+		weight: 2,
+		opacity: 1,
+		color: 'white',
+		dashArray: '3',
+		fillOpacity: 0.7,
+		fillColor: getColor(feature.properties.COUNT)
+	};
+}
+
+function highlightFeature(e) {
+	var layer = e.target;
+	layer.setStyle({
+		weight: 5,
+		color: '#666',
+		dashArray: '',
+		fillOpacity: 0.7
+	});
+	if (!L.Browser.ie && !L.Browser.opera) {
+		layer.bringToFront();
+	}
+	info.update(layer.feature.properties);
+}
+
+var geojson; 
+
+function resetHighlight(e) {
+	geojson.resetStyle(e.target);
+	info.update();
+	}
+
+function zoomToFeature(e) {
+	map.fitBounds(e.target.getBounds());
+	}
+
+function onEachFeature(feature, layer) {
+	layer.on({
+		mouseover: highlightFeature,
+		mouseout: resetHighlight,
+		click: zoomToFeature
+	});
+}
+
+
+//var kod_prop = 91;
+
+var url="{% url 'mapdata2' %}";  //All provinces
+var geodata = [];			//{} for objects, for array use [] 
+var bbox = [];			
+var bounds;
+
+
+//**Ajax
+function send_request(){		//send_request, fetch geoJson data
+    $.ajax({
+    	url: url,
+    	async: false,			//switch to sync javascript!
+    	dataType: 'json',
+    	success: function(data) {
+		//alert ('success');
+		geodata = data;
+    				},
+	error: function(xhr, textStatus, errorThrown)	{
+    		alert(errorThrown);
+  				}
+
+    	  });
+}					//end send_request
+//**end of Ajax
+
+//Call Ajax Function
+send_request();		
+
+geojson = L.geoJson(geodata, {		//geodata only exist if Ajax async: false!
+	style: style,
+	onEachFeature: onEachFeature
+}).addTo(map);		//map added, checkbox on
+//});			//map added, checkbox off
+
+var baseLayers = {
+
+};
+
+var overlays = {
+	"Semua Propinsi" : geojson,
+
+};
+
+L.control.layers(baseLayers, overlays, {
+	collapsed: false
+	}).addTo(map);
+
+var legend = L.control({position: 'bottomright'});
+
+
+
+legend.onAdd = function (map) {
+	var div = L.DomUtil.create('div', 'info legend'),
+		grades = [0, 100, 500, 1000, 2000, 3000, 4000, 5000],
+		labels = [],
+		from, to;
+	for (var i = 0; i < grades.length; i++) {
+		from = grades[i];
+		to = grades[i + 1];
+
+		labels.push(
+			'<i style="background:' + getColor(from + 1) + '"></i> ' +
+			from + (to ? '&ndash;' + to : '+'));
+	}
+	div.innerHTML = labels.join('<br>');
+	return div;
+};
+
+
+
+legend.addTo(map);
+
+
+//Ajax fetch Points
+
+var markers = L.markerClusterGroup();
+function ajax_points(){		//send_request, fetch geoJson points
+    $.ajax({
+    	url: "{% url 'ajaxdatapoint' %}",
+    	async: true,			//set to false to switch to sync!
+    	dataType: 'json',
+    	success: function(data) {
+
+		var geoJsonLayer = L.geoJson(data, {
+			onEachFeature: function (feature, marker) {
+
+				var popupText = 'POI Name: ' + feature.properties.name;
+                                marker.bindLabel(feature.properties.name);
+				marker.bindPopup(popupText);
+
+			}
+		});
+
+		markers.addLayer(geoJsonLayer);
+		map.addLayer(markers);
+
+    				},
+
+	error: function(xhr, textStatus, errorThrown)	{
+    		alert(errorThrown);
+  				}
+
+    	  });
+}					//end send_request
+
+
+
+//**end of Ajax
+
+//Call Ajax Function
+ajax_points();
+
+
+
+	</script>
+</body>
+</html>
+

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Buat daftar Masakan Padang favorit anda!</title>
+	<meta charset="utf-8">
+        <link rel="shortcut icon" href="{{ STATIC_URL }}endikimg/dckLogo.jpg"> 
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/leaflet.css" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/leaflet.draw.css" />   
+	
+	<!--[if lte IE 8]>
+		<link rel="stylesheet" href="lib/leaflet/leaflet.ie.css" />
+		<link rel="stylesheet" href="leaflet.draw.ie.css" />
+	<![endif]-->
+	
+<style>
+
+.leaflet-draw-toolbar a {
+	background-image: url('{{ STATIC_URL }}leaflet-0.7/images/spritesheet.png');
+	background-repeat: no-repeat;
+}
+
+.leaflet-retina .leaflet-draw-toolbar a {
+	background-image: url('{{ STATIC_URL }}leaflet-0.7/images/spritesheet-2x.png');
+	background-size: 210px 30px;
+}
+
+</style>
+	<script src="{{ STATIC_URL }}leaflet-0.7/jquery.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/leaflet.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/leaflet.draw.js"></script>  
+
+</head>
+<body>
+	<div id="map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+	
+	<script>
+	
+var map = L.map('map', {
+	center: [-3.04578, 118.16895],
+	zoom: 5, 
+        minZoom: 4,
+        //maxZoom: 18,
+	});
+
+//-- setup zoom tool ---------------------------------------------
+//L.control.scale().addTo(map);  			//shows both km and mi
+L.control.scale({imperial: false}).addTo(map);		//shows only km, since {metric: true} is default
+
+var indonesia = [{{ qs|safe }}];
+var pois = [{{ qt|safe }}];
+
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 18,
+	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+
+var MyCustomMarker = L.Icon.extend({
+    options: {
+        shadowUrl: null,
+        //iconAnchor: new L.Point(12, 12),
+        //iconSize: new L.Point(24, 24),
+        iconUrl: '{{ STATIC_URL }}leaflet-0.7/images/plus.png'
+    }
+})
+
+	
+geojson = L.geoJson(indonesia, {
+	style: style,
+//	onEachFeature: onEachFeature
+}).addTo(map);		//map added, checkbox on
+//});			//map added, checkbox off
+
+geojson3 = L.geoJson(pois, {
+	style: style,
+   	onEachFeature: function (feature, layer) {
+        	layer.bindPopup(feature.id +', '+ feature.properties.poiname);
+    	}
+}).addTo(map);		//map added, checkbox on
+
+
+
+
+//var drawnItems = new L.FeatureGroup();
+var drawnItems = geojson3;
+map.addLayer(drawnItems);
+
+L.drawLocal.draw.toolbar.buttons.marker = 'Buat Marker';		
+L.drawLocal.draw.handlers.marker.tooltip.start = 'Klik untuk menempatkan marker...';
+L.drawLocal.edit.toolbar.buttons.edit = 'Edit Marker';		
+L.drawLocal.edit.toolbar.buttons.remove = 'Hapus Marker';	
+
+var drawControl = new L.Control.Draw({
+			position: 'topright',
+			draw: {
+				polygon: false,
+				polyline: false,
+				circle: false,
+				rectangle: false,
+                                //marker: true
+        			marker: {
+            				//icon: new MyCustomMarker()		//Works!
+					//find out what properties applied to this damn marker!
+
+        			}
+
+			},
+			edit: {
+				featureGroup: drawnItems
+			}
+});
+map.addControl(drawControl);
+
+
+//Ajax preparation
+			function getCookie(name) {
+			    var cookieValue = null;
+			    if (document.cookie && document.cookie != '') {
+			        var cookies = document.cookie.split(';');
+			        for (var i = 0; i < cookies.length; i++) {
+			            var cookie = jQuery.trim(cookies[i]);
+	            // Does this cookie string begin with the name we want?
+			            if (cookie.substring(0, name.length + 1) == (name + '=')) {
+			                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+			                break;
+			            }
+			        }
+			    }
+			    return cookieValue;
+			}
+			var csrftoken = getCookie('csrftoken');
+
+			function csrfSafeMethod(method) {
+			    // these HTTP methods do not require CSRF protection
+			    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+			}
+
+			$.ajaxSetup({
+			    crossDomain: false, // obviates need for sameOrigin test
+			    beforeSend: function(xhr, settings) {
+			        if (!csrfSafeMethod(settings.type)) {
+			            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			        }
+			    }
+			});
+
+//end of Ajax preparation
+
+map.on('draw:created', function (e) {
+	var type = e.layerType, 
+		layer = e.layer; 
+ 
+	if (type === 'marker') {
+ 
+			var locName = 'Temporer';
+			customMarker = L.Marker.extend({
+				//"feature":{"type":"Feature","properties":{"poiname":locName}}
+			});
+
+			//var jsonlayer = new customMarker(e.layer.getLatLng());
+			var jsonlayer = new customMarker(e.layer.getLatLng(), {
+					"title":"Temporer",		//default ""
+					"opacity": 0.5,			//default 1
+					"riseOnHover": true
+
+			});
+
+
+			//layer2.push(feature.properties["ID"] = "A");
+
+				//alert(JSON.stringify(jsonlayer));
+				//alert(JSON.stringify(e.layer));
+				////alert(JSON.stringify(layer2));
+				//alert(JSON.stringify(e.layer.toGeoJSON()));
+				//alert(layer.getLatLng().lat);	//Works!
+				//alert(layer.getLatLng().lng);	//Works!
+				//var popupContent = feature.properties.namo;	//OK
+
+				var popupContent = locName;	//Works
+
+				jsonlayer.bindPopup(popupContent,{
+        			//	closeButton: true,
+        			//	minWidth: 320
+    				});
+        var poilog = JSON.stringify(jsonlayer.toGeoJSON()); 
+	console.log(poilog);
+
+	}
+
+// Do whatever else you need to. (save to db, add to map etc)  //This is the tipping point!
+drawnItems.addLayer(jsonlayer);
+
+//Save to PostGIS
+	  $.ajax({  
+	    	url: "{% url 'makemarker_handler' 'addnew' 51 %}",  
+		//data: JSON.stringify(jsonlayer.toGeoJSON()),  //csrf_token missing!
+	        type: "POST",  
+		//contentType: 'application/json; charset=utf-8',
+		contentHeader: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+
+		data: {'lat':layer.getLatLng().lat, 'lng':layer.getLatLng().lng, 'poiname':locName, 'Usia':'Muda'},
+
+		success: function(response) {  
+			//alert(response);		//OK
+			objresp = JSON.parse(response);
+			layerid = objresp.respid			 				    				    		
+			//insert poi ID into marker "title" and property.
+			jsonlayer.feature = {"type":"Feature", "id":layerid,"properties":{"poiname":locName}}
+			popupContent = layerid +', '+ "Meh"
+				jsonlayer.bindPopup(popupContent,{
+        			//	closeButton: true,
+        			//	minWidth: 320
+    				});
+
+			},
+		error: function(xhr, textStatus, errorThrown) {
+	    		alert(errorThrown);
+			}
+
+		});
+//end Save to PostGIS
+
+});
+
+//Following draw:edited can be hidden to perform default action.
+map.on('draw:edited', function (e) {
+			var layers = e.layers;
+			var countOfEditedLayers = 0;
+			var updatedpois = []
+			layers.eachLayer(function(layer) {
+				updid = layer.toGeoJSON()['id'];
+				///lnglat = layer.getLatLng().lng +" "+ layer.getLatLng().lat;
+				latlng = layer.getLatLng();
+				updatedpois.push([updid, latlng]);
+				//updatedpois.push(latlng);
+				countOfEditedLayers++;
+			});
+
+			//alert(JSON.stringify(layers.toGeoJSON()));
+
+        upois = JSON.stringify(updatedpois);
+	//alert(upois);		//OK
+
+        //send Ajax to update those pois
+	  $.ajax({  
+	    	url: "{% url 'makemarker_handler' 'update' 51 %}",  
+	        type: "POST",  
+		contentHeader: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+		data: {"updpois": upois },
+		success: function(response) {  
+			//alert(response);		//OK
+			},
+		error: function(xhr, textStatus, errorThrown) {
+	    		alert(errorThrown);
+			}
+
+
+	  	});
+	//end update from PostGIS
+
+
+
+console.log("Edited " + countOfEditedLayers + " layers");
+});
+
+
+//Following draw:deleted can be hidden to perform default action.
+map.on('draw:deleted', function (e) {
+			var layers = e.layers;
+			var countOfDeletedLayers = 0;
+			var deletedpois = []
+			layers.eachLayer(function(layer) {
+				delid = layer.toGeoJSON()['id'];
+				deletedpois.push(delid);
+				countOfDeletedLayers++;
+			});
+	//alert(countOfDeletedLayers);			//Works
+	//alert(JSON.stringify(e.layers.toGeoJSON()));	//Works
+	//alert(deletedpois);				//Works
+        //alert(JSON.stringify(deletedpois));     //OK
+        dpois = JSON.stringify(deletedpois);
+
+        //send Ajax to delete those pois
+	  $.ajax({  
+	    	url: "{% url 'makemarker_handler' 'delete' 51 %}",  
+	        type: "POST",  
+		contentHeader: {'csrfmiddlewaretoken': '{{ csrf_token }}'},
+		data: {"delpois": dpois },
+		//data: deletedpois,
+		success: function(response) {  
+			//alert(response);		//OK
+			},
+		error: function(xhr, textStatus, errorThrown) {
+	    		alert(errorThrown);
+			}
+
+
+	  	});
+	//end delete from PostGIS
+
+});
+
+
+
+function style(feature) {
+	return {
+		weight: 2,
+		opacity: 1,
+		color: 'white',
+		dashArray: '3',
+		fillOpacity: 0.7,	
+		fillColor: '#FFEDA0'
+	};
+}
+
+
+
+
+var overlays = {
+	"PostGIS pois": geojson3
+};
+var baseLayers = {
+	"Indonesia": geojson
+
+};
+
+L.control.layers(baseLayers, overlays, {
+	collapsed: false
+}).addTo(map);	
+
+
+
+function jsonlist() {
+	alert(JSON.stringify(drawnItems.toGeoJSON()));		//Works great!
+	};
+
+var CheckButton = L.Control.extend({
+  options: {
+    position: 'topleft',
+    autoZIndex: true
+  },
+  initialize: function (options) {
+    L.setOptions(this, options);
+  },
+  onAdd: function (map) {
+    var container = L.DomUtil.create('div', 'leaflet-control-options');
+    $(container).html('<button type="button" class="btn-mini btn-primary" onclick=jsonlist();>CheckGeoJSON</button>');
+    L.DomEvent
+      .addListener(container, 'click', L.DomEvent.stopPropagation)
+      .addListener(container, 'click', L.DomEvent.preventDefault);
+    return container;
+  }
+});
+map.addControl(new CheckButton());
+
+
+	</script>
+</body>
+</html>

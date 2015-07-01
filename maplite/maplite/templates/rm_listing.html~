@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Masakan Padang di sekitar anda!</title>
+	<meta charset="utf-8">
+        <link rel="shortcut icon" href="{{ STATIC_URL }}endikimg/dckLogo.jpg"> 
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/leaflet.css" />
+	<link rel="stylesheet" href="{{ STATIC_URL }}leaflet-0.7/leaflet.draw.css" />   
+	
+	<!--[if lte IE 8]>
+		<link rel="stylesheet" href="lib/leaflet/leaflet.ie.css" />
+		<link rel="stylesheet" href="leaflet.draw.ie.css" />
+	<![endif]-->
+	
+<style>
+
+.leaflet-draw-toolbar a {
+	background-image: url('{{ STATIC_URL }}leaflet-0.7/images/spritesheet.png');
+	background-repeat: no-repeat;
+}
+
+.leaflet-retina .leaflet-draw-toolbar a {
+	background-image: url('{{ STATIC_URL }}leaflet-0.7/images/spritesheet-2x.png');
+	background-size: 210px 30px;
+}
+
+</style>
+	<script src="{{ STATIC_URL }}leaflet-0.7/jquery.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/leaflet.js"></script>
+	<script src="{{ STATIC_URL }}leaflet-0.7/leaflet.draw.js"></script>  
+	<script src="{{ STATIC_URL }}leaflet-0.7/data/indonesia.geojson"></script>
+
+</head>
+<body>
+	<div id="map" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></div>
+	
+	<script>
+/*
+map.locate()			To locate the user location.	
+*/
+
+	
+var map = L.map('map', {
+	center: [-3.04578, 118.16895],
+	zoom: 5, 
+        minZoom: 4,
+        //maxZoom: 18,
+	});
+
+L.control.scale({imperial: false}).addTo(map);		//shows only km, since {metric: true} is default
+
+
+L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+	maxZoom: 18,
+	attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'
+	}).addTo(map);
+
+geojson = L.geoJson(IndonesiaData, {
+	style: style,
+//	onEachFeature: onEachFeature
+}).addTo(map);		//map added, checkbox on
+
+
+function style(feature) {
+	return {
+		weight: 2,
+		opacity: 1,
+		color: 'white',
+		dashArray: '3',
+		fillOpacity: 0.7,	
+		fillColor: '#FFEDA0'
+	};
+}
+
+var overlays = {
+	"Indonesia": geojson
+};
+var baseLayers = {
+
+};
+
+L.control.layers(baseLayers, overlays, {
+	collapsed: false
+}).addTo(map);	
+
+
+
+	</script>
+</body>
+</html>
