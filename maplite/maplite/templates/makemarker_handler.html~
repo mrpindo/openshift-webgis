@@ -1,3 +1,0 @@
-{{ reqc|safe }}
-{{ reqf|safe }}
-
